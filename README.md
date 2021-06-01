@@ -1,9 +1,12 @@
 "# airflow_task" https://www.notion.so/Data-Engineer-Skyeng-4f6072b9952846708c31c76824f69654
+
 -To run containers use "docker compose up"
 
 -Make settings for database:
 	1) Run airflow web interface http://localhost:8080 with credentials airflow\airflow
+	
 	2) Go to Admin->Connections
+	
 	3) Add 2 connections:
 
 		mysql_data:
