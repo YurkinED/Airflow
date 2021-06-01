@@ -13,12 +13,12 @@
 		mysql_data:
 		====
 
-		Conn Id		mysql_data
-		Conn Type	MySQL
-		Host		mysql_data
-		Login		root
-		Password 	dataflow	
-		Port 		3306
+		Conn Id			mysql_data
+		Conn Type		MySQL
+		Host			mysql_data
+		Login			root
+		Password 		dataflow	
+		Port 			3306
 
 
 		pg_data:
