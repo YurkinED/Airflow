@@ -122,14 +122,14 @@ with DAG(**dag_params) as dag:
     prepare_create_table = PostgresOperator(
         task_id='create_table',
         postgres_conn_id='pg_data',
-        sql='''CREATE TABLE IF NOT EXISTS order_tbl(
-                id bigint primary key,
-                student_id bigint,
-                teacher_id bigint,
-                stage varchar(10),
-                status varchar(512),
-                created_at timestamp,
-                updated_at timestamp
+        sql='''CREATE TABLE IF NOT EXISTS ORDER_TBL(
+                ID BIGINT PRIMARY KEY,
+                STUDENT_ID BIGINT,
+                TEACHER_ID BIGINT,
+                STAGE VARCHAR(10),
+                STATUS VARCHAR(512),
+                CREATED_AT TIMESTAMP,
+                UPDATED_AT TIMESTAMP
                 );''',
     )
     
@@ -137,55 +137,55 @@ with DAG(**dag_params) as dag:
     prepare_insert_data = PostgresOperator(
         task_id='insert_row',
         postgres_conn_id='pg_data',
-        sql='''insert into order_tbl(
-                id,
-                student_id,
-                teacher_id,
-                stage,
-                status,
-                created_at,
-                updated_at
+        sql='''INSERT INTO ORDER_TBL(
+                ID,
+                STUDENT_ID,
+                TEACHER_ID,
+                STAGE,
+                STATUS,
+                CREATED_AT,
+                UPDATED_AT
                 )
-                select i,
-                trunc(random()*100),
-                trunc(random()*10),
-                trunc(random()*3),
-                trunc(random()*5),
-                now(),
-                now()
-                from generate_series(1,100, 1) as i
-                WHERE NOT EXISTS (SELECT 1 FROM order_tbl)
+                SELECT I,
+                TRUNC(RANDOM()*100),
+                TRUNC(RANDOM()*10),
+                TRUNC(RANDOM()*3),
+                TRUNC(RANDOM()*5),
+                NOW(),
+                NOW()
+                FROM GENERATE_SERIES(1,100, 1) AS I
+                WHERE NOT EXISTS (SELECT 1 FROM ORDER_TBL)
                 ;''',
     )
     
     prepare_mysql = MySqlOperator(
         task_id='insert_sql',
-        sql='''create database if not exists test;
+        sql='''CREATE DATABASE IF NOT EXISTS TEST;
                 \
-                USE test;
+                USE TEST;
                 \
-                CREATE TABLE IF NOT EXISTS raw_order (
-                id bigint primary key AUTO_INCREMENT,
-                order_id bigint,
-                student_id bigint,
-                teacher_id bigint,
-                stage varchar(10),
-                status varchar(512),
-                row_hash bigint,
-                created_at timestamp,
-                updated_at timestamp
+                CREATE TABLE IF NOT EXISTS RAW_ORDER (
+                ID BIGINT PRIMARY KEY AUTO_INCREMENT,
+                ORDER_ID BIGINT,
+                STUDENT_ID BIGINT,
+                TEACHER_ID BIGINT,
+                STAGE VARCHAR(10),
+                STATUS VARCHAR(512),
+                ROW_HASH BIGINT,
+                CREATED_AT TIMESTAMP,
+                UPDATED_AT TIMESTAMP
                 );
                 \
-                CREATE TABLE IF NOT EXISTS raw_order_final (
-                id bigint primary key AUTO_INCREMENT,
-                order_id bigint,
-                student_id bigint,
-                teacher_id bigint,
-                stage varchar(10),
-                status varchar(512),
-                row_hash bigint,
-                created_at timestamp,
-                updated_at timestamp
+                CREATE TABLE IF NOT EXISTS RAW_ORDER_FINAL (
+                ID BIGINT PRIMARY KEY AUTO_INCREMENT,
+                ORDER_ID BIGINT,
+                STUDENT_ID BIGINT,
+                TEACHER_ID BIGINT,
+                STAGE VARCHAR(10),
+                STATUS VARCHAR(512),
+                ROW_HASH BIGINT,
+                CREATED_AT TIMESTAMP,
+                UPDATED_AT TIMESTAMP
                 );''',
         mysql_conn_id='mysql_data',
         autocommit=True
