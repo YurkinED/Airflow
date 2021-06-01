@@ -75,7 +75,6 @@ def mysql_remove_dublicates():
     print(Data)
     mysql = MySqlHook('mysql_data')
     connection = mysql.get_conn()
-    cursor = connection.cursor()
     mysql.run('USE test;')
     mysql.run('TRUNCATE TABLE TEST.RAW_ORDER_FINAL;')
     mysql.run('''INSERT INTO TEST.RAW_ORDER_FINAL 
