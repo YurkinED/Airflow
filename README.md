@@ -2,7 +2,7 @@
 -To run containers use "docker compose up"
 
 -Make settings for database:
-	1) Run airflow web interface Http://localhosy:8080 with credentials airflow\airflow
+	1) Run airflow web interface http://localhost:8080 with credentials airflow\airflow
 	2) Go to Admin->Connections
 	3) Add 2 connections:
 
