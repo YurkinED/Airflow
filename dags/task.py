@@ -1,15 +1,15 @@
 import csv
-import pandas as pd
-import time
-from airflow import DAG
 from datetime import datetime, timedelta
+import time
+
+from airflow import DAG
 from airflow.hooks.mysql_hook import MySqlHook
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.mysql_operator import MySqlOperator
-from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
-
+from airflow.operators.python_operator import PythonOperator
+import pandas as pd
 
 BASE_FILE_PATH = "dags/files/"
 DAG_ID = "ETL_task"
@@ -31,7 +31,9 @@ def export_mysql():
     res=mysql.get_records('select coalesce(max(id),0) as cnt from test.raw_order;')
     print('Using max id for insert data: {}'.format(res[0][0]))
     # Execute the query
-    cursor.execute("select id, student_id, teacher_id, stage, status, created_at, updated_at from order_tbl where id>{}".format(res[0][0]))
+    cursor.execute('''
+                SELECT ID, STUDENT_ID, TEACHER_ID, STAGE, STATUS, CREATED_AT, UPDATED_AT FROM ORDER_TBL WHERE ID>{}
+                '''.format(res[0][0]))
     sources = cursor.fetchall()
     mysql.insert_rows(table='test.raw_order', rows=sources)
     print("Export done")
@@ -46,7 +48,22 @@ def export_csv_to_mysql():
     mysql.run('USE test;')
     mysql.run('truncate table test.raw_order;')
     for i,row in Data.iterrows():
-        sql = "INSERT INTO test.raw_order(order_id, student_id,teacher_id,stage,status,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+        sql = '''INSERT INTO TEST.RAW_ORDER(
+        ORDER_ID, 
+        STUDENT_ID,
+        TEACHER_ID,
+        STAGE,
+        STATUS,
+        CREATED_AT,
+        UPDATED_AT) 
+        VALUES (
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s)'''
         cursor.execute(sql, tuple(row))
         print("Record inserted")
     connection.commit()
@@ -60,8 +77,26 @@ def mysql_remove_dublicates():
     connection = mysql.get_conn()
     cursor = connection.cursor()
     mysql.run('USE test;')
-    mysql.run('truncate table test.raw_order_final;')
-    mysql.run('insert into test.raw_order_final (order_id, student_id, teacher_id, stage, status, row_hash, created_at, updated_at) select order_id, student_id, teacher_id, stage, status, row_hash, created_at, updated_at from  test.raw_order;')
+    mysql.run('TRUNCATE TABLE TEST.RAW_ORDER_FINAL;')
+    mysql.run('''INSERT INTO TEST.RAW_ORDER_FINAL 
+                            (ORDER_ID, 
+                            STUDENT_ID, 
+                            TEACHER_ID, 
+                            STAGE, 
+                            STATUS, 
+                            ROW_HASH, 
+                            CREATED_AT, 
+                            UPDATED_AT) 
+                            SELECT 
+                            ORDER_ID, 
+                            STUDENT_ID, 
+                            TEACHER_ID, 
+                            STAGE, 
+                            STATUS, 
+                            ROW_HASH,
+                            CREATED_AT, 
+                            UPDATED_AT 
+                            FROM  TEST.RAW_ORDER;''')
     connection.commit()
     print("Rempve dublicates done")        
     
@@ -72,7 +107,7 @@ def export_to_csv():
     pgsqlserver = PostgresHook("pg_data")
     connection = pgsqlserver.get_conn()
     cursor = connection.cursor()
-    cursor.execute("select id, student_id, teacher_id, stage, status, created_at, updated_at from order_tbl")
+    cursor.execute("SELECT ID, STUDENT_ID, TEACHER_ID, STAGE, STATUS, CREATED_AT, UPDATED_AT FROM ORDER_TBL")
     result = cursor.fetchall()
     tmp_path = BASE_FILE_PATH + EXPORT_FILENAME
     with open(tmp_path, 'w') as fp:
