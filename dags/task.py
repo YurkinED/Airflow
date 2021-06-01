@@ -1,26 +1,27 @@
-from datetime import datetime, timedelta
-from airflow import DAG
+import csv
+import pandas as pd
 import time
+from airflow import DAG
+from datetime import datetime, timedelta
+from airflow.hooks.mysql_hook import MySqlHook
+from airflow.hooks.postgres_hook import PostgresHook
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.mysql_operator import MySqlOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
-from airflow.operators.mysql_operator import MySqlOperator
-from airflow.hooks.postgres_hook import PostgresHook
-from airflow.hooks.mysql_hook import MySqlHook
-import csv
 
-base_file_path = "dags/files/"
-dag_id = "PostgresOperator_dag"
-export_filename = 'export_data.csv'
+
+BASE_FILE_PATH = "dags/files/"
+DAG_ID = "ETL_task"
+EXPORT_FILENAME = 'export_data.csv'
 
 dag_params = {
-    'dag_id': dag_id,
+    'dag_id': DAG_ID,
     'start_date': datetime(2021, 5, 28),
     'schedule_interval': None
 }
 
-def export_mysql(**kwargs):
-    ti = kwargs['ti']
+def export_mysql():
     # Get the hook
     pgsqlserver = PostgresHook("pg_data")
     connection = pgsqlserver.get_conn()
@@ -35,9 +36,8 @@ def export_mysql(**kwargs):
     mysql.insert_rows(table='test.raw_order', rows=sources)
     print("Export done")
 
-def export_csv_to_mysql(**kwargs):
-    import pandas as pd
-    tmp_path = base_file_path + export_filename
+def export_csv_to_mysql():
+    tmp_path = BASE_FILE_PATH + EXPORT_FILENAME
     Data = pd.read_csv(tmp_path, delimiter=';')
     print(Data)
     mysql = MySqlHook('mysql_data')
@@ -52,9 +52,8 @@ def export_csv_to_mysql(**kwargs):
     connection.commit()
     print("Export done") 
 
-def mysql_remove_dublicates(**kwargs):
-    import pandas as pd
-    tmp_path = base_file_path + export_filename
+def mysql_remove_dublicates():
+    tmp_path = BASE_FILE_PATH + EXPORT_FILENAME
     Data = pd.read_csv(tmp_path, delimiter=';')
     print(Data)
     mysql = MySqlHook('mysql_data')
@@ -68,16 +67,14 @@ def mysql_remove_dublicates(**kwargs):
     
     
     
-def export_to_csv(**kwargs):
-    ti = kwargs['ti']
+def export_to_csv():
     # Get the hook
     pgsqlserver = PostgresHook("pg_data")
     connection = pgsqlserver.get_conn()
     cursor = connection.cursor()
     cursor.execute("select id, student_id, teacher_id, stage, status, created_at, updated_at from order_tbl")
     result = cursor.fetchall()
-    #tmp_path = base_file_path +datetime.now().strftime('%Y%m%d%H%M%S')+ 'dump.csv'
-    tmp_path = base_file_path + export_filename
+    tmp_path = BASE_FILE_PATH + EXPORT_FILENAME
     with open(tmp_path, 'w') as fp:
         a = csv.writer(fp, quoting = csv.QUOTE_MINIMAL, delimiter = ';')
         a.writerow([i[0] for i in cursor.description])

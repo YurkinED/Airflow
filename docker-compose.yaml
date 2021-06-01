@@ -162,13 +162,5 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: dataflow
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 5434:5434
-
-
-
 volumes:
   postgres-db-volume:
